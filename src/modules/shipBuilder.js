@@ -8,7 +8,7 @@ export default class Ship {
     this.location = coords;
   }
 
-  hit() {
+  isHit() {
     this.hits += 1;
     return this.hits;
   }
