@@ -1,18 +1,47 @@
 import Ship from "./shipBuilder";
-import compareCoord from "./compare";
+
+// takes starting coordinate and length of ship to generate spaces a ship will occupy
+function generateCoords ([lat, lon], length, yx) {
+  if(length < 1) return false
+
+  const axis = (yx === 'x') ? lon : lat
+  if (axis + length > 9) throw new Error ('Coordinates must all fall within board', axis+length)
+
+  const coords = []
+
+  for (let i=0; i<length; i += 1){
+    if (yx === 'x') coords.push([lat, lon+i])
+    else coords.push([lat+i, lon])
+  }
+  return coords
+}
+
+// creates an x by x array grid equal to size and returns it
+function initBoard(size) {
+  // Board key:
+  // Empty/Default Square = "D"
+  // Square with ship = Ship array index of ship (0-4)
+  // Attacked empty square = "M" for miss
+  // Attacked square with ship = "H" for hit
+  // Square with sunk ship = "S" for sunk
+
+  const board = [];
+  for (let i = 0; i < size; i+=1) {
+      board.push(Array(size).fill("D"));
+  }
+  return board
+}
 
 export default class Board {
-  // functionality for board state
 
   constructor(size = 10) {
-    this.board = this.initBoard(size)
+    this.board = initBoard(size)
     this.ships = []
   }
 
-  // checks matches between generated coordinates from 'placeShip' and existing list of coordinates from this.ships
-  compareShips (coord) {
-    const match = this.ships.some(ship => ship.location.some(loc => compareCoord(coord, loc)))
-    return match
+  // compares coordinates to matching spaces on board for existing ship placement
+  compareShips (coords) {
+    return coords.some(([lat,lon]) => this.board[lat][lon] !== "D")
   }
 
   gameOver () {
@@ -20,57 +49,43 @@ export default class Board {
       //  do some cool stuff, I guess
     }
   }
-  
-  // eslint-disable-next-line class-methods-use-this
-  initBoard(size) {
-    const board = [];
-    for (let i = 0; i < size; i+=1) {
-        board.push(Array(size).fill(0));
-    }
-    return board
-  }
 
   //  accepts board coordinates (coord), length, and ship orientation (xy), rejects placement if ship already exists with those coordinates
-  placeShip([lat, lon], length, yx) {
+  placeShip([lat, lon], len, yx) {
 
-    if(length < 1) return false
+    if(len < 1) return false
 
-    const axis = (yx === 'x') ? lon : lat
-    if (axis + length > 9) return false
+    const coords = generateCoords([lat, lon], len, yx)
 
-    const coords = []
 
-    for (let i=0; i<length; i += 1){
-      let temp;
-      if (yx === 'x') temp = [lat, lon+i]
-      else temp = [lat+i, lon]
-      if (this.compareShips(temp)) throw new Error(`ship already at these coordinates, ${[coords]}`)
-      coords.push(temp)
-    }
-    this.ships.push(new Ship(length, coords))
+    if (this.compareShips(coords)) throw new Error(`ship already at these coordinates, ${[coords]}`)
+    this.ships.push(new Ship(len, coords))
+    coords.forEach(([c1,c2]) => {
+      this.board[c1][c2] = this.ships.length-1
+    })
+
     return coords
   }
 
 
   receiveAttack ([y,x]) {
-    if(this.board[y][x] === 1) {
+    const target = this.board[y][x]
+    let status;
+    if(target === 'M' || target === 'H' || target === 'S') {
       throw new Error(`coordinate already marked, ${[y,x]}`)
     }
-    this.board[y][x] = 1
-
-    const match = this.ships.find(ship => 
-      ship.location.some(coord => 
-        compareCoord([y,x], coord)
-      )
-    ) ?? false
-    if (match){
-      match.isHit()
-      if (match.isSunk()){
+    if (target === "D") {
+      this.board[y][x] = "M" 
+      status = "M"
+    }
+    else if (Number.isInteger(target)) {
+      this.ships[target].isHit()
+      status = "H"
+      if (this.ships[target].isSunk()) {
         this.gameOver()
+        status = "S"
       }
     }
-
-    return match
-}
-
+    return {status, loc:[y,x]}
+  }
 }

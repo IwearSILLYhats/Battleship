@@ -1,5 +1,6 @@
 import Ship from "../src/modules/shipBuilder";
 import Board from "../src/modules/gameBoard";
+import Player from "../src/modules/player";
 
 describe("does the board?", () => {
   const b = new Board();
@@ -18,14 +19,14 @@ describe("does the board?", () => {
       b.placeShip([0,0], 2, 'y')}).toThrow("ship already at these coordinates")
   })
   test("report  a miss?", () => {
-    expect(b.receiveAttack([1,2])).toBe(false)
+    expect(b.receiveAttack([1,2])).toMatchObject({status: "M", loc:[1,2]})
   })
   test("prevent you from hitting the same square twice?", () => {
     expect(() => {
       b.receiveAttack([1,2])}).toThrow("coordinate already marked")
   })
   test("report  a hit?", () => {
-    expect(b.receiveAttack([0,1])).toMatchObject({hits: 1})
+    expect(b.receiveAttack([0,1])).toMatchObject({status: "H", loc: [0,1]})
   })
 });
 
@@ -47,3 +48,13 @@ describe("does the ship?", () => {
     expect(target.isSunk()).toBe(true);
   });
 });
+describe("Does the player?", () => {
+  const p = new Player()
+  p.init("test")
+  test("generate a board when created?", () => {
+    expect(p.board.board.length).toBe(10)
+  })
+  test("generate correct adjacency list?", () => {
+    expect(p.adjacentSquares([5,5])).toEqual([[5,6], [6,5], [5,4], [4,5]])
+  })
+})
