@@ -17,7 +17,7 @@ function generateCoords ([lat, lon], length, yx) {
 }
 
 // creates an x by x array grid equal to size and returns it
-function initBoard(size) {
+function initBoard(size = 10) {
   // Board key:
   // Empty/Default Square = "D"
   // Square with ship = Ship array index of ship (0-4)
@@ -34,7 +34,7 @@ function initBoard(size) {
 
 export default class Board {
 
-  constructor(size = 10) {
+  constructor(size) {
     this.board = initBoard(size)
     this.ships = []
   }
@@ -72,7 +72,8 @@ export default class Board {
     const target = this.board[y][x]
     let status;
     if(target === 'M' || target === 'H' || target === 'S') {
-      throw new Error(`coordinate already marked, ${[y,x]}`)
+      status = "error"
+      // throw new Error(`coordinate already marked, ${[y,x]}`)
     }
     if (target === "D") {
       this.board[y][x] = "M" 

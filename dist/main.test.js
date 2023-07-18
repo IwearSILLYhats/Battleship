@@ -1,9 +1,11 @@
 import Ship from "../src/modules/shipBuilder";
-import Board from "../src/modules/gameBoard";
-import Player from "../src/modules/player";
+import startGame from "../src";
+import { adjacentSquares } from "../src/modules/aiPlayer";
+
+const game = startGame()
 
 describe("does the board?", () => {
-  const b = new Board();
+  const b = game.player1.board
 
   test("populate the correct number of rows?", () => {
     expect(b.board.length).toBe(10);
@@ -22,8 +24,7 @@ describe("does the board?", () => {
     expect(b.receiveAttack([1,2])).toMatchObject({status: "M", loc:[1,2]})
   })
   test("prevent you from hitting the same square twice?", () => {
-    expect(() => {
-      b.receiveAttack([1,2])}).toThrow("coordinate already marked")
+    expect(b.receiveAttack([1,2])).toMatchObject({status: "error"})
   })
   test("report  a hit?", () => {
     expect(b.receiveAttack([0,1])).toMatchObject({status: "H", loc: [0,1]})
@@ -49,12 +50,19 @@ describe("does the ship?", () => {
   });
 });
 describe("Does the player?", () => {
-  const p = new Player()
-  p.init("test")
   test("generate a board when created?", () => {
-    expect(p.board.board.length).toBe(10)
+    expect(game.player1.board.board.length).toBe(10)
+  })
+})
+describe("Does the AI?", () => {
+  const ai = game.aiPlayer
+  test("correctly generate attack coordinates?", () => {
+    expect(ai.makeAttack([5,5])).toMatchObject({status: "M"})
+  })
+  test("correctly adjust aim?", () => {
+    expect(ai.aiMakeAttack([5,5])).not.toMatchObject({loc: [5,5]})
   })
   test("generate correct adjacency list?", () => {
-    expect(p.adjacentSquares([5,5])).toEqual([[5,6], [6,5], [5,4], [4,5]])
+    expect(adjacentSquares([5,5])).toEqual([[5,6], [6,5], [5,4], [4,5]])
   })
 })
