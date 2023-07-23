@@ -1,8 +1,8 @@
 import Ship from "../src/modules/shipBuilder";
-import startGame from "../src";
+import Game from "../src/modules/gameManager";
 import { adjacentSquares } from "../src/modules/aiPlayer";
 
-const game = startGame()
+const game = new Game()
 
 describe("does the board?", () => {
   const b = game.player1.board
@@ -49,11 +49,13 @@ describe("does the ship?", () => {
     expect(target.isSunk()).toBe(true);
   });
 });
+
 describe("Does the player?", () => {
   test("generate a board when created?", () => {
     expect(game.player1.board.board.length).toBe(10)
   })
 })
+
 describe("Does the AI?", () => {
   const ai = game.aiPlayer
   test("correctly generate attack coordinates?", () => {
@@ -66,3 +68,11 @@ describe("Does the AI?", () => {
     expect(adjacentSquares([5,5])).toEqual([[5,6], [6,5], [5,4], [4,5]])
   })
 })
+
+describe("Does the game?", () => {
+  test("correctly switch turns?", () => {
+    game.takeTurn()
+    expect(game.currentPlayer).toEqual(game.aiPlayer)
+  })
+  })
+  

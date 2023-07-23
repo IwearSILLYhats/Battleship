@@ -69,24 +69,18 @@ export default class Board {
 
 
   receiveAttack ([y,x]) {
+    const atk = {status: "error", loc: [y,x]}
     const target = this.board[y][x]
-    let status;
-    if(target === 'M' || target === 'H' || target === 'S') {
-      status = "error"
-      // throw new Error(`coordinate already marked, ${[y,x]}`)
-    }
+
     if (target === "D") {
       this.board[y][x] = "M" 
-      status = "M"
+      atk.status = "M"
     }
     else if (Number.isInteger(target)) {
       this.ships[target].isHit()
-      status = "H"
-      if (this.ships[target].isSunk()) {
-        this.gameOver()
-        status = "S"
-      }
+      atk.status = "H"
+      atk.ship = this.ships[target]
     }
-    return {status, loc:[y,x]}
+    return atk
   }
 }

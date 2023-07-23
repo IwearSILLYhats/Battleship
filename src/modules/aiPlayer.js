@@ -22,7 +22,7 @@ export default class Ai extends Player {
         return ship
       }
 
-        // picks a random square on the board and then scrolls up or down until it lands on a valid (not hit/miss/sunk) square, then makes an attack
+  // picks a random square on the board and then scrolls up or down until it lands on a valid (not hit/miss/sunk) square, then makes an attack
   aiMakeAttack () {
     let [rndmy, rndmx] = randomCoord();
     const rndmScroll = (randomNum(2)) ? 1 : -1
@@ -45,5 +45,10 @@ export default class Ai extends Player {
       atk = this.makeAttack([rndmy, rndmx])
     }
     return atk
+  }
+
+  startTurn() {
+    this.aiMakeAttack()
+    endTurn()
   }
 }
