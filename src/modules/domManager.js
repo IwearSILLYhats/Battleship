@@ -1,6 +1,11 @@
 const gameArea = document.querySelector('.gameArea')
+const roster = document.querySelector('.roster')
 
-
+export function clearBoard () {
+    while(gameArea.firstChild){
+        gameArea.firstChild.remove()
+    }
+}
 export function generateBoard () {
     const board = document.createElement('div')
     board.classList.add('board')
@@ -35,19 +40,35 @@ export function markSquare (boardState, targ, hideShips = true) {
 }
 
 export function renderBoard (boardState, dom, hideShips=true) {
-    const rows = [...dom.querySelector('.row')]
+    const rows = [...dom.querySelectorAll('.row')]
     for (let i = 0; i < 10; i+=1){
         const curRow = rows[i]
-        const curCell = [...curRow.querySelector('cell')]
+        const curCell = [...curRow.querySelectorAll('.cell')]
         for(let j = 0; j < 10; j+=1){
-            markSquare(boardState, curCell[j], hideShips)
+            markSquare(boardState[i][j], curCell[j], hideShips)
         }
     }
 }
 
 export function findTarget ([yCoord, xCoord], dom) {
-    const row = [...dom.querySelector('.row')][yCoord]
-    const targ = [...row.querySelector('.cell')][xCoord]
+    const row = [...dom.querySelectorAll('.row')][yCoord]
+    const targ = [...row.querySelectorAll('.cell')][xCoord]
     return targ
 }
 
+export function renderAttack (atk, dom, hidden = true) {
+    const aim = findTarget(atk.loc, dom)
+    markSquare(atk.status, aim, hidden)
+}
+export function generateUiShips (shipList) {
+    shipList.forEach(ship => {
+        const container = document.createElement('div')
+        container.classList.add('ship')
+        for (let i = 0; i < ship; i += 1){
+            const segment = document.createElement('div')
+            segment.classList.add('segment')
+            container.appendChild(segment)
+        }
+        roster.appendChild(container)
+    })
+}

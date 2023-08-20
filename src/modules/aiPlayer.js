@@ -14,19 +14,19 @@ function randomCoord () {
   }
 
 export default class Ai extends Player {
-    aiPlaceShip (len) {
+    placeShip (len) {
         const yx = (randomNum(2)) ? 'y' : 'x'
         const coord = randomCoord()
         const ship = this.board.placeShip(coord, len, yx)
-        if (!ship) return this.aiPlaceShip(len)
+        if (!ship) return this.placeShip(len)
         return ship
       }
 
   // picks a random square on the board and then scrolls up or down until it lands on a valid (not hit/miss/sunk) square, then makes an attack
-  aiMakeAttack () {
+  makeAttack () {
     let [rndmy, rndmx] = randomCoord();
     const rndmScroll = (randomNum(2)) ? 1 : -1
-    let atk = this.makeAttack([rndmy,rndmx])
+    let atk = super.makeAttack([rndmy,rndmx])
 
     while (atk.status === "error") {
       if(rndmx <= 0) {
@@ -42,13 +42,12 @@ export default class Ai extends Player {
       else {
         rndmx += rndmScroll
       }
-      atk = this.makeAttack([rndmy, rndmx])
+      atk = super.makeAttack([rndmy, rndmx])
     }
     return atk
   }
 
   startTurn() {
-    this.aiMakeAttack()
-    endTurn()
+    this.makeAttack()
   }
 }

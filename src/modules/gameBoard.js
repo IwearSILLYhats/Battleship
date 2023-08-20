@@ -2,18 +2,23 @@ import Ship from "./shipBuilder";
 
 // takes starting coordinate and length of ship to generate spaces a ship will occupy
 function generateCoords ([lat, lon], length, yx) {
-  if(length < 1) return false
+    if(length < 1) return false
+  
+    const axis = (yx === 'x') ? lon : lat
+    if (axis + length > 10) return false
+  
+    const coords = []
+  
+    for (let i=0; i<length; i += 1){
+      if (yx === 'x') coords.push([lat, lon+i])
+      else coords.push([lat+i, lon])
+    }
+    return coords
+}
 
-  const axis = (yx === 'x') ? lon : lat
-  if (axis + length > 9) throw new Error ('Coordinates must all fall within board', axis+length)
-
-  const coords = []
-
-  for (let i=0; i<length; i += 1){
-    if (yx === 'x') coords.push([lat, lon+i])
-    else coords.push([lat+i, lon])
-  }
-  return coords
+function uiError (error) {
+  const errorBox = document.querySelector('.info')
+  errorBox.textContent = error
 }
 
 // creates an x by x array grid equal to size and returns it
@@ -52,24 +57,29 @@ export default class Board {
 
   //  accepts board coordinates (coord), length, and ship orientation (xy), rejects placement if ship already exists with those coordinates
   placeShip([lat, lon], len, yx) {
-
-    if(len < 1) return false
-
-    const coords = generateCoords([lat, lon], len, yx)
-
-
-    if (this.compareShips(coords)) throw new Error(`ship already at these coordinates, ${[coords]}`)
-    this.ships.push(new Ship(len, coords))
-    coords.forEach(([c1,c2]) => {
-      this.board[c1][c2] = this.ships.length-1
-    })
-
-    return coords
+    try{
+      if(len < 1) return false
+  
+      const coords = generateCoords([lat, lon], len, yx)
+      if (coords === false) throw new Error ('Coordinates must all fall within board')
+  
+      if (this.compareShips(coords)) throw new Error(`ship already at these coordinates, ${[coords]}`)
+      this.ships.push(new Ship(len, coords))
+      coords.forEach(([c1,c2]) => {
+        this.board[c1][c2] = this.ships.length-1
+      })
+  
+      return coords
+    }
+    catch (error) {
+      uiError(error)
+      return false
+    }
   }
 
 
   receiveAttack ([y,x]) {
-    const atk = {status: "error", loc: [y,x]}
+    const atk = {status: "error", loc: [y,x], ship: null}
     const target = this.board[y][x]
 
     if (target === "D") {
@@ -84,3 +94,4 @@ export default class Board {
     return atk
   }
 }
+

@@ -25,6 +25,7 @@ footer, header, hgroup, menu, nav, section {
 }
 body {
 	line-height: 1;
+	padding: .5rem;
 }
 ol, ul {
 	list-style: none;
@@ -50,24 +51,25 @@ table {
     margin: 1rem 0;
 }
 .row {
-	width: 100%;
+	width: fit-content;
     display: grid;
     grid-template-columns: repeat(10, 1fr);
 }
-.cell {
-    min-width: 2rem;
-	width: 100%;
-    min-height: 2rem;
-	height: 100%;
+.cell, .segment {
+    min-width: 1.5rem;
+	width: 3.5vh;
+    min-height: 1.5rem;
+	height: 3.5vh;
     border: 1px solid black;
     text-align: center;
 }
 .main {
     margin: auto;
-    width: 50%;
+	width: fit-content;
 }
 .gameArea {
-    max-width: 98vw;
+	width: 100%;
+    /* max-width: 88vw; */
     max-height: 80vw;
 }
 .main h1{
@@ -75,7 +77,54 @@ table {
 	text-align: center;
 	font-size: xx-large;
 }
-.ui{
+.panel{
+	width: auto;
+	position: relative;
+}
+
+.roster{
+	width: 100%;
+	max-height: 20rem;
+	justify-content: center;
 	text-align: center;
-	border: 5px solid black;
+	border: 1px solid black;
+	display:block;
+	overflow: hidden;
+	transition: max-height 1s ease-in-out;
+}
+.ship{
+	width: fit-content;
+	height: fit-content;
+	margin: .5rem;
+	display: flex;
+	flex-direction: row;
+}
+.ship:hover .segment, .selected{
+	border: 5px solid black
+}
+.segment{
+	border: 2px solid black;
+	background-color: grey;
+}
+#toggle{
+	position: absolute;
+	bottom: 0;
+	transform: translateY(50%);
+	left: 50%;
+}
+.info{
+	border: 1px solid black;
+	width: 100%;
+	padding: .5rem 0;
+	text-align: center;
+}
+#toggle:checked + .roster {
+	transition: max-height 1s ease-in-out;
+	max-height: 0;
+}
+.vertical .ship {
+	flex-direction: column;
+}
+.roster.vertical {
+	display: flex;
 }
