@@ -29,12 +29,12 @@ export default class Ai extends Player {
     let atk = super.makeAttack([rndmy,rndmx])
 
     while (atk.status === "error") {
-      if(rndmx <= 0) {
+      if(rndmx <= 0 && rndmScroll === -1) {
         rndmx = 9
         rndmy -= 1
         if(rndmy < 0) rndmy = 9
       }
-      else if (rndmx >= 9) {
+      else if (rndmx >= 9 && rndmScroll === 1) {
         rndmx = 0
         rndmy += 1
         if(rndmy > 9) rndmy = 0

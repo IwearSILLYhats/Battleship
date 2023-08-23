@@ -1,3 +1,4 @@
+const errorBox = document.querySelector('.info')
 const gameArea = document.querySelector('.gameArea')
 const roster = document.querySelector('.roster')
 
@@ -6,6 +7,12 @@ export function clearBoard () {
         gameArea.firstChild.remove()
     }
 }
+
+function resetError () {
+    if(roster.firstChild) errorBox.textContent = "Please place your ships"
+    else errorBox.textContent = "Please choose a square to attack"
+  }
+
 export function generateBoard () {
     const board = document.createElement('div')
     board.classList.add('board')
@@ -72,3 +79,8 @@ export function generateUiShips (shipList) {
         roster.appendChild(container)
     })
 }
+
+export function uiError (error) {
+    errorBox.textContent = error
+    setTimeout(resetError, 5000)
+  }

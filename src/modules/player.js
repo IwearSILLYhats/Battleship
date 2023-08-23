@@ -1,5 +1,5 @@
 import Board from "./gameBoard";
-import { generateBoard } from "./domManager";
+import { generateBoard, uiError } from "./domManager";
 
 export default class Player {
 
@@ -16,6 +16,7 @@ export default class Player {
       return this.opponent.board.receiveAttack([y,x])
     }
     catch (error){
+      uiError(error)
       return false
     }
   }

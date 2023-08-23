@@ -1,6 +1,6 @@
 import Player from "./player";
 import Ai from "./aiPlayer";
-import {renderAttack, generateUiShips, renderBoard} from "./domManager"
+import {renderAttack, generateUiShips, renderBoard, uiError} from "./domManager"
 
 function getIndex (element) {
     return [...element.parentNode.children].indexOf(element)
@@ -9,7 +9,7 @@ function getIndex (element) {
 export default class Game {
     constructor(){
         this.aiPlayer = new Ai()
-        this.player1 = new Ai()
+        this.player1 = new Player()
         this.aiPlayer.init(this.player1)
         this.player1.init(this.aiPlayer)
         this.currentPlayer = this.player1
@@ -22,46 +22,41 @@ export default class Game {
 
     startGame(){
         renderBoard(this.player1.board.board, this.player1.dom, true)
-        this.placeRoster()
+        generateUiShips(this.shipList)
         this.rosterListener()
         this.boardListeners()
+        this.aiShipPlacement ()
+        renderBoard(this.aiPlayer.board.board, this.aiPlayer.dom, false)
         this.placingShips = true
         
     }
-    
-    takeTurn () {
-        let hidden = true
-        if (this.currentPlayer === this.player1) hidden = false
-        const atk = this.currentPlayer.makeAttack([2,2])
-        renderAttack(atk, this.currentPlayer.opponent.dom, hidden)
-        this.currentPlayer = this.currentPlayer.opponent
-    }
-    
-    placeRoster () {
-        generateUiShips(this.shipList)
-    }
 
-    demoShipPlacement () {
-        const shipCoords = [[0,0], [0,2], [0,4], [0,6], [0,8]]
-        shipCoords.forEach((coord, indx) => {
-            this.player1.placeShip(this.shipList[indx])
-        })
-        shipCoords.forEach((coord, indx) => {
-            this.aiPlayer.board.placeShip(coord, this.shipList[indx], "y")
+    aiShipPlacement () {
+        this.shipList.forEach((coord) => {
+            this.aiPlayer.placeShip(coord)
         })
     }
     
     boardListeners () {
         const boards = document.querySelectorAll('.board')
         boards[0].addEventListener('click', (e) => {
-            if (this.placingShips === false && e.target.closest('.cell')){
-                const atkCoords = [ getIndex(e.target.parentNode), getIndex(e.target)]
-                this.currentPlayer.makeAttack(atkCoords)
+            if (this.placingShips === false && e.target.closest('.cell')) {
+                const atkCoords = [getIndex(e.target.parentNode), getIndex(e.target)]
+                const atk = this.player1.makeAttack(atkCoords)
+                renderAttack(atk, this.player1.opponent.dom, true)
+                if (atk.status !== "error") {
+                    if (atk.status === "H") this.checkWinner()
+                    if (this.placingShips !== null) {
+                        const enemyAtk = this.aiPlayer.makeAttack()
+                        renderAttack(enemyAtk, this.player1.dom, false)
+                        console.log(enemyAtk)
+                    }
+                }
             }
         })
 
         boards[1].addEventListener('click', (e) => {
-            if (this.placingShips === true && e.target.closest('.cell')) {
+            if (this.placingShips === true && this.selectedShip != null && e.target.closest('.cell')) {
                 const shipCoords = [ getIndex(e.target.parentNode), getIndex(e.target)]
                 const attemptPlacement = this.player1.board.placeShip(shipCoords, this.selectedShip.childElementCount, this.axis)
 
@@ -69,6 +64,9 @@ export default class Game {
                     this.selectedShip.remove()
                     this.selectedShip = null
                     renderBoard(this.player1.board.board, this.player1.dom, false)
+                    if(document.querySelectorAll('.ship').length === 0) {
+                        this.placingShips = false
+                    }
                 }
             }
         })
@@ -79,6 +77,7 @@ export default class Game {
         roster.addEventListener('click', (e) => {
             roster.querySelectorAll('.ship').forEach((ship) => {
                 ship.classList.remove('selected')
+                this.selectedShip = null
             })
             if (e.target.closest('.ship')) {
                 const closest = e.target.closest('.ship')
@@ -102,4 +101,16 @@ export default class Game {
     selectedShip(val) {
         this.selectedShip = val
     }
+    
+    checkWinner () {
+        if (this.player1.opponent.board.ships.every((ship) => ship.isSunk())){
+            uiError('Player1 Wins!')
+            this.placingShips = null
+        }
+        else if (this.player1.board.ships.every((ship) => ship.isSunk())){
+            uiError('AI Wins!')
+            this.placingShips = null
+        }
+    }
 }
+

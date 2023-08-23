@@ -1,4 +1,5 @@
 import Ship from "./shipBuilder";
+import { uiError } from "./domManager";
 
 // takes starting coordinate and length of ship to generate spaces a ship will occupy
 function generateCoords ([lat, lon], length, yx) {
@@ -14,11 +15,6 @@ function generateCoords ([lat, lon], length, yx) {
       else coords.push([lat+i, lon])
     }
     return coords
-}
-
-function uiError (error) {
-  const errorBox = document.querySelector('.info')
-  errorBox.textContent = error
 }
 
 // creates an x by x array grid equal to size and returns it
@@ -87,6 +83,7 @@ export default class Board {
       atk.status = "M"
     }
     else if (Number.isInteger(target)) {
+      this.board[y][x] = "H" 
       this.ships[target].isHit()
       atk.status = "H"
       atk.ship = this.ships[target]
